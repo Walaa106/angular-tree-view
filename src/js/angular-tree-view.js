@@ -36,6 +36,7 @@ angular.module('TreeView')
                 this.refreshDatas();
             },
             refreshDatas: function () {
+                var self = this;
                 this.initDatas().then(function (data) {
                     $scope.showDatas = angular.copy(data);
                     var helpers = self.createHelpers($scope.showDatas);
@@ -47,7 +48,7 @@ angular.module('TreeView')
             },
             initDatas: function () {
                 var deferred = $q.defer();
-
+                
                 if (angular.isFunction($scope.datas.then)) {
                     $scope.datas.then(function (data) {
                         deferred.resolve(data);
@@ -108,13 +109,6 @@ angular.module('TreeView')
                     } else {
                         $scope.ngModel = result;
                     }
-                });
-                
-                $scope.$watch('inputModel', function (newValue, oldValue) {
-                    if (newValue === undefined) {
-                        return;
-                    }
-                    self.refreshDatas();
                 });
                 
                 $scope.$watch('ngModel', function (newValue, oldValue) {
@@ -266,7 +260,7 @@ angular.module('TreeView')
     }
 
 	return {
-		template: 'angular-tree-view.tpl',
+		templateUrl: 'angular-tree-view.tpl',
 		scope: {
 			datas: '=inputModel',
 			ngModel: '=',

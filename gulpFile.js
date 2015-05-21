@@ -38,7 +38,6 @@ function createTemplate() {
     return gulp.src('src/template/*.tpl')
     .pipe(ngTemplate({
         moduleName: 'TreeView',
-        standalone: true,
         filePath: './templates.js'
     })); 
 }

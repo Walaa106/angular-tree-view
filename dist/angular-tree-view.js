@@ -82,7 +82,7 @@ angular.module('TreeView', ['RecursionHelper'])
 			iconCollapse: '@',
 			helperObject: '='
 		},
-		template: 'angular-tree-view-item.tpl',
+		templateUrl: 'angular-tree-view-item.tpl',
 		compile: function (element) {
 			return RecursionHelper.compile(element, link);
 		}
@@ -126,6 +126,7 @@ angular.module('TreeView')
                 this.refreshDatas();
             },
             refreshDatas: function () {
+                var self = this;
                 this.initDatas().then(function (data) {
                     $scope.showDatas = angular.copy(data);
                     var helpers = self.createHelpers($scope.showDatas);
@@ -137,7 +138,7 @@ angular.module('TreeView')
             },
             initDatas: function () {
                 var deferred = $q.defer();
-
+                
                 if (angular.isFunction($scope.datas.then)) {
                     $scope.datas.then(function (data) {
                         deferred.resolve(data);
@@ -198,13 +199,6 @@ angular.module('TreeView')
                     } else {
                         $scope.ngModel = result;
                     }
-                });
-                
-                $scope.$watch('inputModel', function (newValue, oldValue) {
-                    if (newValue === undefined) {
-                        return;
-                    }
-                    self.refreshDatas();
                 });
                 
                 $scope.$watch('ngModel', function (newValue, oldValue) {
@@ -356,7 +350,7 @@ angular.module('TreeView')
     }
 
 	return {
-		template: 'angular-tree-view.tpl',
+		templateUrl: 'angular-tree-view.tpl',
 		scope: {
 			datas: '=inputModel',
 			ngModel: '=',
@@ -375,7 +369,7 @@ angular.module('TreeView')
 
 'use strict';
 
-angular.module('TreeView', []).run(['$templateCache', function($templateCache) {
+angular.module('TreeView').run(['$templateCache', function($templateCache) {
 
   $templateCache.put('angular-tree-view-item.tpl', '<ul class="tree-view-group">\n	<li ng-repeat="data in datas" ng-class="{expanded: isExpanded(data)}" ng-show="isFiltered(data)">\n		<a ng-class="{checked: isChecked(data)}" ng-click="toggleChecked(data, $event)">\n			<span ng-class="getIcon(data)" ng-click="toggleExpanded(data, $event)"></span>\n			{{ data[displayProperty] }}\n		</a>\n		<tree-view-item\n		ng-if="data.children" \n		datas="data.children" \n		value-property="{{ valueProperty }}"\n		display-property="{{ displayProperty }}"\n		icon-leaf="{{ iconLeaf }}"\n		icon-expand="{{ iconExpand }}"\n		icon-collapse="{{ iconCollapse }}"\n		helper-object="helperObject"\n		></tree-view-item>\n	</li>\n</ul>');
 

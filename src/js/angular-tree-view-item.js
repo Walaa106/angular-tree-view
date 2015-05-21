@@ -82,7 +82,7 @@ angular.module('TreeView', ['RecursionHelper'])
 			iconCollapse: '@',
 			helperObject: '='
 		},
-		template: 'angular-tree-view-item.tpl',
+		templateUrl: 'angular-tree-view-item.tpl',
 		compile: function (element) {
 			return RecursionHelper.compile(element, link);
 		}

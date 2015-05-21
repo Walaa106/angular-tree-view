@@ -1,0 +1,29 @@
+{
+  "name": "angular-tree-view",
+  "version": "0.0.0",
+  "homepage": "https://github.com/hxlniada/angular-tree-view",
+  "description": "angular-tree-view",
+  "main": "dist/angular-tree-view.min.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "angular",
+    "tree-view"
+  ],
+  "authors": [
+    "huangxueliang@baidu.com"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-recursion": "~1.0.5",
+    "angular": "~1.3.15"
+  }
+}

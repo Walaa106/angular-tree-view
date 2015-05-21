@@ -1,0 +1,32 @@
+{
+  "name": "angular-tree-view",
+  "version": "1.0.0",
+  "description": "angular-tree-view",
+  "main": "dist/angular-tree-view.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hxlniada/angular-tree-view.git"
+  },
+  "keywords": [
+    "angular",
+    "tree-view"
+  ],
+  "author": "huangxueliang@baidu.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hxlniada/angular-tree-view/issues"
+  },
+  "homepage": "https://github.com/hxlniada/angular-tree-view",
+  "devDependencies": {
+    "event-stream": "^3.3.1",
+    "gulp": "^3.8.11",
+    "gulp-concat": "^2.5.2",
+    "gulp-ng-template": "^0.2.1",
+    "gulp-order": "^1.1.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^1.2.0"
+  }
+}

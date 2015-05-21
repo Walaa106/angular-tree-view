@@ -123,6 +123,9 @@ angular.module('TreeView')
                 var self = this;
                 element.addClass('tree-view');
                 this.bindEvents();
+                this.refreshDatas();
+            },
+            refreshDatas: function () {
                 this.initDatas().then(function (data) {
                     $scope.showDatas = angular.copy(data);
                     var helpers = self.createHelpers($scope.showDatas);
@@ -195,6 +198,13 @@ angular.module('TreeView')
                     } else {
                         $scope.ngModel = result;
                     }
+                });
+                
+                $scope.$watch('inputModel', function (newValue, oldValue) {
+                    if (newValue === undefined) {
+                        return;
+                    }
+                    self.refreshDatas();
                 });
                 
                 $scope.$watch('ngModel', function (newValue, oldValue) {

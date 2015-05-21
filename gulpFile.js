@@ -5,6 +5,8 @@ var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var eventStream = require('event-stream');
 var order = require('gulp-order');
+var less = require('gulp-less');
+var minifyCss = require('gulp-minify-css');
 
 gulp.task('build', function () {
     return eventStream.merge(
@@ -19,6 +21,15 @@ gulp.task('build', function () {
     .pipe(rename('angular-tree-view.min.js'))
     .pipe(gulp.dest('dist'));
     	
+});
+
+gulp.task('css', function () {
+    return gulp.src('src/less/*.less')
+    .pipe(less())
+    .pipe(gulp.dest('./dist'))
+    .pipe(minifyCss())
+    .pipe(rename('angular-tree-view.min.css'))
+    .pipe(gulp.dest('./dist'));
 });
 
 function createTemplate() {

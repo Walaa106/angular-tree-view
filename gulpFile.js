@@ -7,6 +7,7 @@ var eventStream = require('event-stream');
 var order = require('gulp-order');
 var less = require('gulp-less');
 var minifyCss = require('gulp-minify-css');
+var ngAnnotate = require('gulp-ng-annotate');
 
 gulp.task('build', function () {
     return eventStream.merge(
@@ -17,6 +18,7 @@ gulp.task('build', function () {
     .pipe(order(['**/angular-tree-view-item.js', '**/angular-tree-view.js', '**/templates.js']))
     .pipe(concat('angular-tree-view.js'))
     .pipe(gulp.dest('dist'))
+    .pipe(ngAnnotate())
     .pipe(uglify())
     .pipe(rename('angular-tree-view.min.js'))
     .pipe(gulp.dest('dist'));

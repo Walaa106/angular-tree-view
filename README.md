@@ -83,7 +83,10 @@ angular.module('yourModule', ['TreeView']);
     ```
     default: 'text'
     ```
- 
+* filter-model optional
+
+ the model to filter
+
 * icon-leaf optional
     ```
     default: 'glyphicon glyphicon-file fa fa-file'

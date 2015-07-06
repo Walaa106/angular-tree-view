@@ -3,7 +3,10 @@
   "version": "0.0.3",
   "homepage": "https://github.com/hxlniada/angular-tree-view",
   "description": "angular-tree-view",
-  "main": "dist/angular-tree-view.min.js",
+  "main": [
+    "dist/angular-tree-view.min.js",
+    "dist/angular-tree-view.min.css"
+  ],
   "moduleType": [
     "globals"
   ],

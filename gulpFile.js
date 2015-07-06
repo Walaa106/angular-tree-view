@@ -1,3 +1,7 @@
+/**
+ * @file gulp file
+ * @author 862802759@qq.com
+ */
 var gulp = require('gulp');
 var ngTemplate = require('gulp-ng-template');
 var concat = require('gulp-concat');
@@ -22,7 +26,6 @@ gulp.task('build', function () {
     .pipe(uglify())
     .pipe(rename('angular-tree-view.min.js'))
     .pipe(gulp.dest('dist'));
-    	
 });
 
 gulp.task('css', function () {
@@ -39,5 +42,5 @@ function createTemplate() {
     .pipe(ngTemplate({
         moduleName: 'TreeView',
         filePath: './templates.js'
-    })); 
+    }));
 }

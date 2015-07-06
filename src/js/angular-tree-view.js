@@ -1,22 +1,26 @@
-angular.module('TreeView')
-.directive('treeView', function (RecursionHelper, $q, $filter) {
+/**
+ * @file tree-view组件
+ * @author 862802759@qq.com
+ */
+angular.module('TreeView').directive('treeView',
+function (RecursionHelper, $q, $filter) {
     var filters = {
         filter: $filter('filter')
     };
 
-	function link($scope, element) {
-    	$scope.displayProperty = $scope.displayProperty || 'text';
-    	$scope.valueProperty = $scope.valueProperty || 'id';
-    	$scope.childrenProperty = $scope.childrenProperty || 'children';
+    function link($scope, element) {
+        $scope.displayProperty = $scope.displayPropertyMiddle || 'text';
+        $scope.valueProperty = $scope.valuePropertyMiddle || 'id';
+        $scope.childrenProperty = $scope.childrenPropertyMiddle || 'children';
 
-    	$scope.iconLeaf = $scope.iconLeaf || 'glyphicon glyphicon-file fa fa-file';
-    	$scope.iconExpand = $scope.iconExpand || 'glyphicon glyphicon-minus fa fa-minus';
-    	$scope.iconCollapse = $scope.iconCollapse || 'glyphicon glyphicon-plus fa fa-plus';
-    	
+        $scope.iconLeaf = $scope.iconLeafMiddle || 'glyphicon glyphicon-file';
+        $scope.iconExpand = $scope.iconExpandMiddle || 'glyphicon glyphicon-minus';
+        $scope.iconCollapse = $scope.iconCollapseMiddle || 'glyphicon glyphicon-plus ';
+
         var utils = {
             arrayMinus: function (source, target) {
-                var source = source || [];
-                var target = target || [];
+                source = source || [];
+                target = target || [];
                 var result = [];
                 for (var i = 0; i < source.length; i++) {
                     if (target.indexOf(source[i]) === -1) {
@@ -33,10 +37,6 @@ angular.module('TreeView')
                 var self = this;
                 element.addClass('tree-view');
                 this.bindEvents();
-                this.refreshDatas();
-            },
-            refreshDatas: function () {
-                var self = this;
                 this.initDatas().then(function (data) {
                     $scope.showDatas = angular.copy(data);
                     var helpers = self.createHelpers($scope.showDatas);
@@ -48,12 +48,13 @@ angular.module('TreeView')
             },
             initDatas: function () {
                 var deferred = $q.defer();
-                
-                if (angular.isFunction($scope.datas.then)) {
-                    $scope.datas.then(function (data) {
+
+                if (angular.isFunction($scope.datas.success)) {
+                    $scope.datas.success(function (data) {
                         deferred.resolve(data);
                     });
-                } else {
+                }
+                else {
                     deferred.resolve($scope.datas);
                 }
                 return deferred.promise;
@@ -67,7 +68,8 @@ angular.module('TreeView')
                     added.forEach(function (value) {
                         self.changeStateById(value, true);
                     });
-                } else {
+                }
+                else {
                     angular.forEach($scope.ngModel, function (value) {
                         self.changeStateById(value, true);
                     });
@@ -106,17 +108,18 @@ angular.module('TreeView')
                     result = self.deleteDuplicated(result);
                     if (result.length === 0) {
                         $scope.ngModel = undefined;
-                    } else {
+                    }
+                    else {
                         $scope.ngModel = result;
                     }
                 });
-                
+
                 $scope.$watch('ngModel', function (newValue, oldValue) {
                     if ((newValue === oldValue) || (self.status !== 'success')) {
                         return;
                     }
                     var deletedValues = utils.arrayMinus(oldValue, newValue);
-                    var addedValues = utils.arrayMinus(newValue, oldValue); 
+                    var addedValues = utils.arrayMinus(newValue, oldValue);
 
                     self.updateHelperByInput(addedValues, deletedValues);
                 });
@@ -130,6 +133,7 @@ angular.module('TreeView')
                     });
                     var result = filters.filter($scope.helperArray, {
                         text: newValue
+
                     });
                     result.forEach(function (value) {
                         self.getHelper(value.id).filtered = true;
@@ -180,7 +184,7 @@ angular.module('TreeView')
                 var helper = this.getHelper(data);
 
                 this.calculateDown(helper);
-                this.calculateUp(helper); 
+                this.calculateUp(helper);
             },
             calculateDown: function (helper) {
                 if (helper.children) {
@@ -207,11 +211,10 @@ angular.module('TreeView')
                 var helper = this.getHelper(id);
                 if (!helper.parent) {
                     return false;
-                } else {
-                    return this.getHelper(helper.parent).body[$scope.valueProperty];
                 }
+                return this.getHelper(helper.parent).body[$scope.valueProperty];
             },
-            getHelper: function(input) {
+            getHelper: function (input) {
                 var id = input;
                 if (angular.isObject(input)) {
                     id = input[$scope.valueProperty];
@@ -223,14 +226,13 @@ angular.module('TreeView')
             },
             // 递归推入所有对象建立双链表，并建立数组方便筛选
             createHelpers: function (value) {
-                var obj = {},
-                    arr = [];
+                var obj = {};
+                var arr = [];
 
                 function createHelper(value, parent) {
                     if (!angular.isArray(value)) {
                         return;
                     }
-
                     for (var i = 0; i < value.length; i++) {
                         obj[value[i][$scope.valueProperty]] = {
                             body: value[i],
@@ -240,10 +242,11 @@ angular.module('TreeView')
                         arr.push({
                             text: value[i][$scope.displayProperty],
                             id: value[i][$scope.valueProperty]
+
                         });
                         if (value[i][$scope.childrenProperty]) {
                             createHelper(value[i][$scope.childrenProperty], value[i]);
-                        }               
+                        }
                     }
                 }
 
@@ -259,19 +262,19 @@ angular.module('TreeView')
         treeView.init();
     }
 
-	return {
-		templateUrl: 'angular-tree-view.tpl',
-		scope: {
-			datas: '=inputModel',
-			ngModel: '=',
+    return {
+        templateUrl: 'angular-tree-view.tpl',
+        scope: {
+            datas: '=inputModel',
+            ngModel: '=',
             filterModel: '=',
-			valueProperty: '@',
-			displayProperty: '@',
-			childrenProperty: '@',
-            iconLeaf: '@',
-            iconCollapse: '@',
-            iconExpand: '@'
-		},
-		link: link	
-	};
+            valuePropertyMiddle: '@valueProperty',
+            displayPropertyMiddle: '@displayProperty',
+            childrenPropertyMiddle: '@childrenProperty',
+            iconLeafMiddle: '@iconLeaf',
+            iconCollapseMiddle: '@iconCollapse',
+            iconExpandMiddle: '@iconExpand'
+        },
+        link: link
+    };
 });

@@ -26,6 +26,11 @@ function (RecursionHelper, $q, $filter) {
         },
         controller: function ($scope, $element, $attrs) {
             var id = 0;
+            // modelId表示值
+            // checkId表示要将model更新的动作
+            // 如果modelId与checkId相等，则表示此次操作model已经更新过了
+            // 在操作的最后需要将modelId和checkId重新弄成不相等的情况
+            // 以方便下次更新
             var modelId = 1;
             var checkId = 0;
 
@@ -114,6 +119,8 @@ function (RecursionHelper, $q, $filter) {
                                 ? value.body[$scope.valueProperty] : value, true, true);
                         });
                     }
+                    // 在计算过后更新model，以防漏网之鱼
+                    self.updateModelByCheck(true);
                 },
                 changeStateById: function (id, value, isNgModelChange) {
                     $scope.helperObject[id].checked = value;
@@ -127,9 +134,9 @@ function (RecursionHelper, $q, $filter) {
                         this.collapseDown(id);
                     }
                 },
-                updateModelByCheck: function () {
+                // isFromModel 是否是因为model的变化而导致整个节点需要重新计算
+                updateModelByCheck: function (isFromModel) {
                     checkId = modelId;
-
                     var result = [];
                     angular.forEach($scope.helperObject, function (item) {
                         if (item.checked) {
@@ -145,13 +152,23 @@ function (RecursionHelper, $q, $filter) {
                         result = this.deleteDuplicated(result);
                     }
                     if (result.length === 0) {
+                        // 如果是因为model的变化而导致整个节点更新，并且model在节点更新后未改变
+                        // 则手动将modelId自增
+                        if (isFromModel && (!$scope.ngModel || !$scope.ngModel.length)) {
+                            modelId++;
+                        }
                         $scope.ngModel = undefined;
                     }
                     else {
+                        if (isFromModel && ($scope.ngModel && ($scope.ngModel.length === result.length))) {
+                            console.log('modelId++');
+                            modelId++;
+                        }
                         $scope.ngModel = $scope.singleMode ? result[0] : result;
                     }
                 },
                 changeStateByModelChange: function (newValue, oldValue) {
+                    // checkId = modelId说明model已经更新过了，不需要再重复计算
                     if ((newValue === oldValue && angular.isUndefined(newValue))
                             || (this.status !== 'success')
                             || (checkId === modelId)) {

@@ -184,7 +184,6 @@ function (RecursionHelper, $q, $filter) {
                     }
                     else {
                         if (isFromModel && ($scope.ngModel && ($scope.ngModel.length === result.length))) {
-                            console.log('modelId++');
                             modelId++;
                         }
                         $scope.ngModel = $scope.singleMode ? result[0] : result;

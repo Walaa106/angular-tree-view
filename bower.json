@@ -1,7 +1,7 @@
 {
   "name": "angular-tree-view",
-  "version": "0.0.3",
-  "homepage": "https://github.com/hxlniada/angular-tree-view",
+  "version": "1.0.0",
+  "homepage": "http://gitlab.baidu.com/dianquan/angular-tree-view",
   "description": "angular-tree-view",
   "main": [
     "dist/angular-tree-view.min.js",
@@ -23,10 +23,11 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "deps"
   ],
   "dependencies": {
     "angular-recursion": "~1.0.5",
-    "angular": "~1.4.1"
+    "angular": "~1.4.2"
   }
 }

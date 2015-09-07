@@ -1,36 +1,36 @@
 .tree-view {
-	ul {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-	.tree-view-group {
-		margin-left: 20px;
-		display: none;
-		a {
-			margin: 2px 0;
-			cursor: pointer;
-			display: block;
-			text-decoration: none;
-			padding: 4px 10px;
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .tree-view-group {
+        margin-left: 20px;
+        display: none;
+        a {
+            margin: 2px 0;
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+            padding: 4px 10px;
             color: #4183c4;
 
-			&:hover {
-				background: #eee;
-			}
-			&.checked {
-				background: #428bca;
-				color: #fff;
-			}
-		}
-	}
-	>.tree-view-group {
-		margin-left: 0;
-		display: block;
-	}
-	.expanded {
-		>.tree-view-group {
-			display: block;
-		}
-	}
+            &:hover {
+                background: #eee;
+            }
+            &.checked {
+                background: #428bca;
+                color: #fff;
+            }
+        }
+    }
+    >.tree-view-group {
+        margin-left: 0;
+        display: block;
+    }
+    .expanded {
+        >.tree-view-group {
+            display: block;
+        }
+    }
 }

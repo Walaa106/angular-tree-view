@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html ng-app="app" ng-controller="MainControl">
+<head>
+    <meta charset="UTF-8">
+    <title>angular-tree-veiw example</title>
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./dist/angular-tree-view.min.css">
+    <script src="http://cdn.bootcss.com/angular.js/1.4.2/angular.min.js"></script>
+    <script src="./deps/angular-recursion.min.js"></script>
+    <script src="./dist/angular-tree-view.js"></script>
+</head>
+<body>
+    <div ng-if="test">
+        <tree-view
+        ng-model="form.value"
+        input-model="test"
+        recursion-check-all="true"
+        single-mode="false"
+        output-all-info="true"
+        output-duplicate="false"></tree-view>
+    </div>
+    <button ng-click="testClick()">start</button>
+    {{form.value}}
+    <script>
+        angular.module('app', ['TreeView'])
+            .controller('MainControl', function ($scope) {
+                $scope.testClick = function () {
+                    $scope.test = [
+                        {
+                            id: 'a',
+                            text: 'a',
+                            children: [
+                                {
+                                    id: 'a1',
+                                    text: 'a1'
+                                },
+                                {
+                                    id: 'a2',
+                                    text: 'a2'
+                                }
+                            ]
+                        },
+                        {
+                            id: 'b',
+                            text: 'b'
+                        }
+                    ];
+                };
+                $scope.form = {
+                    value: [{body:{id:'a1',text:'a1'}}]
+                };
+                
+            });
+    </script>
+</body>
+</html>

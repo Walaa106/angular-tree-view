@@ -14,12 +14,8 @@ var minifyCss = require('gulp-minify-css');
 var ngAnnotate = require('gulp-ng-annotate');
 
 gulp.task('build', function () {
-    return eventStream.merge(
-        gulp.src('src/js/angular-tree-view-item.js'),
-        gulp.src('src/js/angular-tree-view.js'),
-        createTemplate()
-    )
-    .pipe(order(['**/angular-tree-view-item.js', '**/angular-tree-view.js', '**/templates.js']))
+    return eventStream.merge(gulp.src('src/js/angular-tree-view.js'))
+    .pipe(order(['**/angular-tree-view.js']))
     .pipe(concat('angular-tree-view.js'))
     .pipe(gulp.dest('dist'))
     .pipe(ngAnnotate())
@@ -36,11 +32,3 @@ gulp.task('css', function () {
     .pipe(rename('angular-tree-view.min.css'))
     .pipe(gulp.dest('./dist'));
 });
-
-function createTemplate() {
-    return gulp.src('src/template/*.tpl')
-    .pipe(ngTemplate({
-        moduleName: 'TreeView',
-        filePath: './templates.js'
-    }));
-}

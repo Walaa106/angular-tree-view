@@ -7,8 +7,25 @@
   margin-left: 20px;
   display: none;
 }
-.tree-view .tree-view-group a {
+.tree-view .tree-view-group .tree-check {
   margin: 2px 0;
+  padding: 4px 0;
+  cursor: pointer;
+  float: left;
+}
+.tree-view .tree-view-group .tree-icon {
+  margin: 2px 3px;
+  padding: 4px 0;
+  color: #4183c4;
+  cursor: pointer;
+  float: left;
+}
+.tree-view .tree-view-group .tree-icon:hover {
+  color: #052646;
+}
+.tree-view .tree-view-group a {
+  overflow: hidden;
+  margin: 4px;
   cursor: pointer;
   display: block;
   text-decoration: none;
@@ -22,8 +39,15 @@
   background: #428bca;
   color: #fff;
 }
+.tree-view > tree-view-item > .tree-view-group {
+  margin-left: 0;
+  display: block;
+}
 .tree-view > .tree-view-group {
   margin-left: 0;
+  display: block;
+}
+.tree-view .expanded > tree-view-item > .tree-view-group {
   display: block;
 }
 .tree-view .expanded > .tree-view-group {

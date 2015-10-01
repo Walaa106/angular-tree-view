@@ -11,10 +11,12 @@ angular.module('TreeView', [])
         iconCollapse: 'fa fa-plus glyphicon glyphicon-plus',
         template: [
             '<ul class="tree-view-group">',
-                '<li ng-repeat="data in data[children]" ng-class="{expanded: isExpanded(data)}"',
-                    'ng-show="isFiltered(data)">',
+                '<li ng-repeat="data in data[children]"',
+                    'ng-class="{expanded: isExpanded(data)}"',
+                    'ng-if="!filterModel || isFiltered(data)">',
                     '<span class="tree-icon" ng-class="getExpandIcon(data)" ng-click="toggleExpanded(data, $event)"></span>',
-                    '<a ng-class="{checked: isChecked(data)}" ng-click="toggleChecked(data, $event)">',
+                    '<a ng-class="{checked: isChecked(data), indetermine: !isChecked(data) && childrenChecked(data)}"',
+                        'ng-click="toggleChecked(data, $event)">',
                         '{{ data[displayProperty] }}',
                     '</a>',
                     '<tree-view-item',
@@ -39,11 +41,7 @@ angular.module('TreeView', [])
         }
     };
 })
-.directive('treeView', function ($q, $filter, treeViewConfig) {
-    var filters = {
-        filter: $filter('filter')
-    };
-
+.directive('treeView', function ($q, treeViewConfig) {
     return {
         scope: {
             outputAllInfo: '=',
@@ -65,6 +63,8 @@ angular.module('TreeView', [])
             scope.$treeTransclude = childTranscludeFn;
         },
         controller: function ($scope, $element, $attrs, $compile) {
+            var id = 0;
+
             $scope.options = $scope.options || {};
             $scope.displayProperty = $scope.options.displayProperty || 'text';
             $scope.valueProperty = $scope.options.valueProperty || 'id';
@@ -305,6 +305,9 @@ angular.module('TreeView', [])
                     // 一个迭代，将$treeView的一些属性加进去
                     for (var i = 0; i < data.length; i++) {
                         data[i].$treeView = data[i].$treeView || {};
+                        if (!($scope.valueProperty in data[i])) {
+                            data[i][$scope.valueProperty] = id++;
+                        }
                         this.hashObject[data[i][$scope.valueProperty]] = data[i];
                         stack.push(data[i]);
                     }
@@ -315,6 +318,9 @@ angular.module('TreeView', [])
                                 var tempChild = tempData[$scope.children][i];
                                 tempChild.$treeView = tempChild.$treeView || {};
                                 tempChild.$treeView.parentData = tempData;
+                                if (!($scope.valueProperty in tempChild)) {
+                                    tempChild[$scope.valueProperty] = id++;
+                                }
                                 this.hashObject[tempChild[$scope.valueProperty]] = tempChild;
                                 stack.push(tempChild);
                             }
@@ -338,21 +344,31 @@ angular.module('TreeView', [])
                     }
 
                     $scope.$watch('filterModel', function (newValue, oldValue) {
-                        if (newValue === oldValue) {
+                        if (!newValue) {
                             return;
                         }
-                        angular.forEach($scope.helperObject, function (item, key) {
-                            item.filtered = false;
+                        var result = [];
+                        angular.forEach(self.hashObject, function (item, key) {
+                            if (item[$scope.displayProperty].toString().indexOf(newValue) !== -1) {
+                                result.push(item);
+                            }
+                            else {
+                                item.$treeView.isFiltered = false;
+                            }
                         });
-                        var result = filters.filter($scope.helperArray, {
-                            text: newValue
-                        });
-                        result.forEach(function (value) {
-                            self.getHelper(value.id).filtered = true;
-                            self.filtUp(value.id);
-                            self.expandUp(value.id);
-                        });
+
+                        for (var i = 0; i < result.length; i++) {
+                            result[i].$treeView.isFiltered = true;
+                            self.filtUp(result[i]);
+                            self.expandUp(result[i]);
+                        }
                     });
+                },
+                filtUp: function (data) {
+                    if (data.$treeView.parentData && !data.$treeView.parentData.isFiltered) {
+                        data.$treeView.parentData.isFiltered = true;
+                        this.filtUp(data.$treeView.parentData);
+                    }
                 }
             };
 
@@ -379,6 +395,33 @@ angular.module('TreeView', [])
                 return !!data.$treeView.isChecked;
             };
 
+            $scope.childrenChecked = function (data) {
+                if (!data[$scope.children] || !data[$scope.children].length) {
+                    return false;
+                }
+                var stack = [];
+                var children = data[$scope.children];
+                for (var i = 0; i < children.length; i++) {
+                    if (children[i].$treeView.isChecked) {
+                        return true;
+                    }
+                    stack.push(children[i]);
+                }
+                while (stack.length) {
+                    var tempData = stack.pop();
+                    if (!tempData.children || !tempData.children.length) {
+                        continue;
+                    }
+                    for (i = 0; i < tempData.children.length; i++) {
+                        if (tempData.children[i].$treeView.isChecked) {
+                            return true;
+                        }
+                        stack.push(tempData.children[i]);
+                    }
+                }
+                return false;
+            };
+
             $scope.toggleChecked = function (data) {
                 var preValue = $scope.isChecked(data);
                 var valueChangedItems = [data];
@@ -395,8 +438,7 @@ angular.module('TreeView', [])
             };
 
             $scope.isFiltered = function (data) {
-                return true;
-                // return treeView.getHelper(data).filtered !== false;
+                return !!data.$treeView.isFiltered;
             };
 
             var initRegister = $scope.$watch('datas', function (newValue, oldValue) {

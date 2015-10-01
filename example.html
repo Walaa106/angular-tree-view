@@ -9,11 +9,13 @@
     <script src="./src/js/angular-tree-view.js"></script>
 </head>
 <body>
+    <input type="text" ng-model="filter">
     <tree-view
         ng-model="form.value"
         input-model="test"
         recursion-check="true"
         single-mode="false"
+        filter-model="filter"
         output-all-info="false"
         duplicate-model="false"
         options="{valueProperty: 'dirId', displayProperty: 'dirName'}"></tree-view>

@@ -35,6 +35,10 @@
 .tree-view .tree-view-group a:hover {
   background: #eee;
 }
+.tree-view .tree-view-group a.indetermine {
+  background: #8AA0B3;
+  color: #fff;
+}
 .tree-view .tree-view-group a.checked {
   background: #428bca;
   color: #fff;

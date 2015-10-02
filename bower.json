@@ -26,8 +26,7 @@
     "tests",
     "deps"
   ],
-  "dependencies": {
-    "angular-recursion": "~1.0.5",
-    "angular": "~1.4.2"
+  "dependencies": {    
+    "angular": "~1.4.6"
   }
 }

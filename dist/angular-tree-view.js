@@ -53,7 +53,8 @@ angular.module('TreeView', [])
             outputDuplicate: '=',
             singleMode: '=',
             options: '=',
-            transferData: '='
+            transferData: '=',
+            hashObject: '='
         },
         link: function (scope, element, attrs, treeCtrl, childTranscludeFn) {
             treeCtrl.template(scope, function (clone) {
@@ -114,12 +115,17 @@ angular.module('TreeView', [])
 
             var treeView = {
                 modelInited: false,
+                inited: false,
                 init: function (value) {
                     $element.addClass('tree-view');
                     this.transformDataToTree(value);
                     $scope.data = {};
                     $scope.data[$scope.children] = value;
-                    this.bindEvents();
+                    if (!this.inited) {
+                        this.bindEvents();
+                    }
+                    this.inited = true;
+                    this.modelInited = false;
                 },
                 // 如果结果只需要id，剥掉object外壳
                 unwrap: function (rawObjects) {
@@ -231,12 +237,26 @@ angular.module('TreeView', [])
 
                         // 这里是为了防止不允许重复(outputDuplicate为false时)
                         // 父层被选中，子层被deleteDuplicate后，出现的混乱情况
-                        if ($scope.recursionCheck
+                        if (!$scope.outputDuplicate
                                 && currentData.$treeView.parentData
                                 && currentData.$treeView.parentData.$treeView.isChecked) {
                             continue;
                         }
                         currentData.$treeView.isChecked = false;
+                        // 推拉框优化，右边只有一个选项时（全选）
+                        // 因为只有一个选项，所以deleted.length === 1
+                        // 并且没有added
+                        // 或者反选的时候，此时newValue为空
+                        if (!$scope.outputDuplicate
+                                && (!newValue.length
+                                        || (deleted.length === 1 && !added.length))) {
+                            this.calculateDown(currentData);
+                        }
+                    }
+                    // 推拉框优化
+                    // 全选时，去掉重复
+                    if (!$scope.outputDuplicate && newValue.length === this.currentLength) {
+                        this.deleteDuplicated($scope.ngModel);
                     }
                 },
                 expandUp: function (data) {
@@ -300,14 +320,17 @@ angular.module('TreeView', [])
                     }
                 },
                 hashObject: {},
+                currentLength: 0,
                 transformDataToTree: function (data) {
                     var stack = [];
+                    this.hashObject = {};
                     // 一个迭代，将$treeView的一些属性加进去
                     for (var i = 0; i < data.length; i++) {
                         data[i].$treeView = data[i].$treeView || {};
                         if (!($scope.valueProperty in data[i])) {
                             data[i][$scope.valueProperty] = id++;
                         }
+                        this.currentLength++;
                         this.hashObject[data[i][$scope.valueProperty]] = data[i];
                         stack.push(data[i]);
                     }
@@ -321,10 +344,14 @@ angular.module('TreeView', [])
                                 if (!($scope.valueProperty in tempChild)) {
                                     tempChild[$scope.valueProperty] = id++;
                                 }
+                                this.currentLength++;
                                 this.hashObject[tempChild[$scope.valueProperty]] = tempChild;
                                 stack.push(tempChild);
                             }
                         }
+                    }
+                    if ($attrs.hashObject) {
+                        $scope.hashObject = this.hashObject;
                     }
                 },
                 bindEvents: function () {
@@ -441,10 +468,9 @@ angular.module('TreeView', [])
                 return !!data.$treeView.isFiltered;
             };
 
-            var initRegister = $scope.$watch('datas', function (newValue, oldValue) {
+            $scope.$watch('datas', function (newValue, oldValue) {
                 if (angular.isDefined(newValue)) {
                     treeView.init(newValue);
-                    initRegister();
                 }
             });
         }

@@ -54,7 +54,7 @@ angular.module('TreeView', [])
             scope.transcludeScope.$odd = scope.$odd;
             scope.transcludeScope.$even = scope.$even;
 
-            scope.$on('$destroy', function() {
+            scope.$on('$destroy', function () {
                 scope.transcludeScope.$destroy();
             });
             scope.$treeTransclude(scope.transcludeScope, function (clone) {
@@ -63,7 +63,7 @@ angular.module('TreeView', [])
         }
     };
 })
-.directive('treeView', function ($q, treeViewConfig) {
+.directive('treeView', function (treeViewConfig) {
     return {
         scope: {
             outputAllInfo: '=',

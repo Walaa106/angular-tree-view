@@ -18,7 +18,9 @@
         filter-model="filter"
         output-all-info="false"
         duplicate-model="false"
-        options="{valueProperty: 'dirId', displayProperty: 'dirName'}"></tree-view>
+        options="{valueProperty: 'dirId', displayProperty: 'dirName'}">
+        <span>我了个操{{$index}}</span>
+    </tree-view>
     <button ng-click="testClick()">start</button>
     {{form.value}}
     <script>

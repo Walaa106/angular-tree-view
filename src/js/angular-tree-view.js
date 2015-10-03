@@ -18,6 +18,7 @@ angular.module('TreeView', [])
                     '<a ng-class="{checked: isChecked(data), indetermine: !isChecked(data) && childrenChecked(data)}"',
                         'ng-click="toggleChecked(data, $event)">',
                         '{{ data[displayProperty] }}',
+                        '<tree-view-transclude></tree-view-transclude>',
                     '</a>',
                     '<tree-view-item',
                         'ng-if="data[children] && isExpanded(data)"',
@@ -41,6 +42,27 @@ angular.module('TreeView', [])
         }
     };
 })
+.directive('treeViewTransclude', function () {
+    return {
+        link: function (scope, element) {
+            scope.transcludeScope = scope.parentScopeOfTree.$new();
+            scope.transcludeScope.node = scope.data;
+            scope.transcludeScope.$index = scope.$index;
+            scope.transcludeScope.$first = scope.$first;
+            scope.transcludeScope.$middle = scope.$middle;
+            scope.transcludeScope.$last = scope.$last;
+            scope.transcludeScope.$odd = scope.$odd;
+            scope.transcludeScope.$even = scope.$even;
+
+            scope.$on('$destroy', function() {
+                scope.transcludeScope.$destroy();
+            });
+            scope.$treeTransclude(scope.transcludeScope, function (clone) {
+                element.empty().append(clone);
+            });
+        }
+    };
+})
 .directive('treeView', function ($q, treeViewConfig) {
     return {
         scope: {
@@ -56,15 +78,17 @@ angular.module('TreeView', [])
             transferData: '=',
             hashObject: '='
         },
+        transclude: true,
         link: function (scope, element, attrs, treeCtrl, childTranscludeFn) {
             treeCtrl.template(scope, function (clone) {
                 element.empty().append(clone);
             });
-
             scope.$treeTransclude = childTranscludeFn;
         },
         controller: function ($scope, $element, $attrs, $compile) {
             var id = 0;
+
+            $scope.parentScopeOfTree = $scope.$parent;
 
             $scope.options = $scope.options || {};
             $scope.displayProperty = $scope.options.displayProperty || 'text';

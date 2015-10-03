@@ -17,7 +17,6 @@ angular.module('TreeView', [])
                     '<span class="tree-icon" ng-class="getExpandIcon(data)" ng-click="toggleExpanded(data, $event)"></span>',
                     '<a ng-class="{checked: isChecked(data), indetermine: !isChecked(data) && childrenChecked(data)}"',
                         'ng-click="toggleChecked(data, $event)">',
-                        '{{ data[displayProperty] }}',
                         '<tree-view-transclude></tree-view-transclude>',
                     '</a>',
                     '<tree-view-item',

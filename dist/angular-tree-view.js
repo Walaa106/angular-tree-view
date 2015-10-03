@@ -325,8 +325,8 @@ angular.module('TreeView', [])
                             && data.$treeView.parentData.$treeView.isChecked !== data.$treeView.isChecked) {
                         var preValue = !!data.$treeView.parentData.$treeView.isChecked;
                         var checked = 0;
-                        for (var i = 0; i < data.$treeView.parentData.children.length; i++) {
-                            if (data.$treeView.parentData.children[i].$treeView.isChecked) {
+                        for (var i = 0; i < data.$treeView.parentData[$scope.children].length; i++) {
+                            if (data.$treeView.parentData[$scope.children][i].$treeView.isChecked) {
                                 checked++;
                             }
                         }

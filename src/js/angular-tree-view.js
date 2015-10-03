@@ -71,11 +71,9 @@ angular.module('TreeView', [])
             ngModel: '=',
             filterModel: '=',
             recursionCheck: '=',
-            recursionExpand: '=',
             outputDuplicate: '=',
             singleMode: '=',
             options: '=',
-            transferData: '=',
             hashObject: '='
         },
         transclude: true,

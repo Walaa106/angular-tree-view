@@ -348,26 +348,23 @@ angular.module('TreeView', [])
                     this.hashObject = {};
                     // 一个迭代，将$treeView的一些属性加进去
                     for (var i = 0; i < data.length; i++) {
-                        data[i].$treeView = data[i].$treeView || {};
-                        if (!($scope.valueProperty in data[i])) {
-                            data[i][$scope.valueProperty] = id++;
-                        }
-                        this.currentLength++;
-                        this.hashObject[data[i][$scope.valueProperty]] = data[i];
                         stack.push(data[i]);
                     }
                     while (stack.length) {
                         var tempData = stack.pop();
+
+                        tempData.$treeView = tempData.$treeView || {};
+                        if (!($scope.valueProperty in tempData)) {
+                            tempData[$scope.valueProperty] = id++;
+                        }
+                        this.currentLength++;
+                        this.hashObject[tempData[$scope.valueProperty]] = tempData;
+
                         if (tempData[$scope.children] && tempData[$scope.children].length) {
                             for (i = 0; i < tempData[$scope.children].length; i++) {
                                 var tempChild = tempData[$scope.children][i];
                                 tempChild.$treeView = tempChild.$treeView || {};
                                 tempChild.$treeView.parentData = tempData;
-                                if (!($scope.valueProperty in tempChild)) {
-                                    tempChild[$scope.valueProperty] = id++;
-                                }
-                                this.currentLength++;
-                                this.hashObject[tempChild[$scope.valueProperty]] = tempChild;
                                 stack.push(tempChild);
                             }
                         }
@@ -451,20 +448,17 @@ angular.module('TreeView', [])
                 var stack = [];
                 var children = data[$scope.children];
                 for (var i = 0; i < children.length; i++) {
-                    if (children[i].$treeView.isChecked) {
-                        return true;
-                    }
                     stack.push(children[i]);
                 }
                 while (stack.length) {
                     var tempData = stack.pop();
+                    if (tempData.$treeView.isChecked) {
+                        return true;
+                    }
                     if (!tempData.children || !tempData.children.length) {
                         continue;
                     }
                     for (i = 0; i < tempData.children.length; i++) {
-                        if (tempData.children[i].$treeView.isChecked) {
-                            return true;
-                        }
                         stack.push(tempData.children[i]);
                     }
                 }

@@ -311,11 +311,11 @@ angular.module('TreeView', [])
                     if (data[$scope.children]) {
                         for (var i = 0; i < data[$scope.children].length; i++) {
                             if (data[$scope.children][i].$treeView.isChecked !== data.$treeView.isChecked) {
-                                valueChangedItems && valueChangedItems.push(data.children[i]);
-                                data.children[i].$treeView.isChecked = data.$treeView.isChecked;
+                                valueChangedItems && valueChangedItems.push(data[$scope.children][i]);
+                                data[$scope.children][i].$treeView.isChecked = data.$treeView.isChecked;
                                 // 如果父子状态一样就没必要往下检测了
                                 // 只有全选的时候才有可能一样
-                                this.calculateDown(data.children[i]);
+                                this.calculateDown(data[$scope.children][i]);
                             }
                         }
                     }

@@ -73,7 +73,8 @@ angular.module('TreeView', [])
             outputDuplicate: '=',
             singleMode: '=',
             options: '=',
-            hashObject: '='
+            hashObject: '=',
+            enableCheck: '='
         },
         transclude: true,
         link: function (scope, element, attrs, treeCtrl, childTranscludeFn) {
@@ -154,8 +155,8 @@ angular.module('TreeView', [])
                         rawObjects[i] = rawObjects[i][$scope.valueProperty];
                     }
                 },
-                // isFromModel 是否是因为model的变化而导致整个节点需要重新计算
-                updateModelByCheck: function (changedItems, changeToResult, isFromModel) {
+                // target 是否是check的这个节点
+                updateModelByCheck: function (changedItems, changeToResult, target) {
                     // 如果输出结果不是输出所有(只输出id)
                     if (!$scope.outputAllInfo) {
                         this.unwrap(changedItems);
@@ -175,63 +176,54 @@ angular.module('TreeView', [])
                             this.deleteDuplicated($scope.ngModel);
                         }
                         if (changeToResult === false) {
-                            this.fillResult($scope.ngModel, changedItems);
+                            this.fillResult($scope.ngModel, changedItems, target);
                         }
                     }
                 },
                 // 在不允许重复模式中
-                // 多选的复层被去掉后，子层剩余的要被选中
-                fillResult: function (result, deleted) {
+                // 多选的父层被去掉后，子层剩余的要被选中
+                fillResult: function (result, deleted, target) {
                     var pairs = [];
                     // 最底层的节点
-                    var bottomChild;
-                    // 第一步，找出自己以及父层同时被删除的节点对(可能是三个以上)
-                    for (var i = 0; i < deleted.length; i++) {
-                        var parentItem = this.getParentItem(deleted[i]);
+                    var cloneTarget = target;
+                    while (cloneTarget.$treeView.parentData) {
+                        var parentItem = this.getParentItem(cloneTarget);
                         if (deleted.indexOf(parentItem) !== -1) {
-                            if (pairs.indexOf(parentItem) === -1) {
-                                pairs.push(parentItem);
-                            }
-                            bottomChild = deleted[i];
-                            pairs.push(deleted[i]);
+                            pairs.push(cloneTarget);
+                            cloneTarget = cloneTarget.$treeView.parentData;
+                        }
+                        else {
+                            break;
                         }
                     }
+
                     if (!pairs.length) {
                         return;
                     }
-
-                    // 根据底层节点以及父层节点，将底层节点的相邻节点选中
-                    var parentObject = $scope.outputAllInfo
-                        ? bottomChild.$treeView.parentData
-                        : this.hashObject[bottomChild].$treeView.parentData;
-
-                    // 如果是反选或者不存在这样的对
-                    if (pairs.length >= parentObject[$scope.children].length) {
-                        return;
+                    for (var i = 0; i < pairs.length; i++) {
+                        var resultToConcat = [].concat(pairs[i].$treeView.parentData[$scope.children]);
+                        resultToConcat.splice(resultToConcat.indexOf(pairs[i]), 1);
+                        if (!$scope.outputAllInfo) {
+                            this.unwrap(resultToConcat);
+                        }
+                        Array.prototype.push.apply(result, resultToConcat);
                     }
-
-                    var childObject = $scope.outputAllInfo ? bottomChild : this.hashObject[bottomChild];
-                    var resultToConcat = [].concat(parentObject[$scope.children]);
-                    resultToConcat.splice(resultToConcat.indexOf(childObject), 1);
-                    if (!$scope.outputAllInfo) {
-                        this.unwrap(resultToConcat);
-                    }
-                    Array.prototype.push.apply(result, resultToConcat);
                 },
                 // 在不允许重复模式中
                 // 父层被选择后，子层的值需要去掉
                 deleteDuplicated: function (result) {
+                    var deleted = [];
                     for (var i = 0; i < result.length; i++) {
-                        var parentItem;
+                        var parentObject;
                         if (!$scope.outputAllInfo) {
-                            parentItem = this.hashObject[result[i]].$treeView.parentData;
-                            parentItem = parentItem && parentItem[$scope.valueProperty];
+                            parentObject = this.hashObject[result[i]].$treeView.parentData;
+                            parentObject = parentObject && parentObject[$scope.valueProperty];
                         }
                         else {
-                            parentItem = result[i].$treeView.parentData;
+                            parentObject = result[i].$treeView.parentData;
                         }
-                        if (result.indexOf(parentItem) !== -1) {
-                            result.splice(i, 1);
+                        if (result.concat(deleted).indexOf(parentObject) !== -1) {
+                            deleted = deleted.concat(result.splice(i, 1));
                             i--;
                         }
                     }
@@ -294,8 +286,9 @@ angular.module('TreeView', [])
                 },
                 getParentItem: function (data) {
                     var parentItem;
+                    var currentObject = angular.isObject(data) ? data : this.hashObject[data];
                     if (!$scope.outputAllInfo) {
-                        parentItem = this.hashObject[data].$treeView.parentData;
+                        parentItem = currentObject.$treeView.parentData;
                         parentItem = parentItem && parentItem[$scope.valueProperty];
                     }
                     else {
@@ -476,11 +469,15 @@ angular.module('TreeView', [])
                 if ($scope.recursionCheck) {
                     treeView.calculateChecked(data, valueChangedItems);
                 }
-                treeView.updateModelByCheck(valueChangedItems, data.$treeView.isChecked, false);
+                treeView.updateModelByCheck(valueChangedItems, data.$treeView.isChecked, data);
             };
 
             $scope.isFiltered = function (data) {
                 return !!data.$treeView.isFiltered;
+            };
+
+            $scope.isCheckable = function () {
+                return $scope.enableCheck !== false;
             };
 
             $scope.$watch('datas', function (newValue, oldValue) {

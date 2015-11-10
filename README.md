@@ -15,7 +15,7 @@ bower install angular-tree-view --save
 * icon font(bootstrap / font-awesome / other...)
 
 ### usage
-* add it to your module dependence
+* app
 ```javascript
 angular.module('yourModule', ['TreeView']);
 ```

@@ -14,7 +14,8 @@ angular.module('TreeView', [])
                 '<li ng-repeat="data in data[children]"',
                     'ng-class="{expanded: isExpanded(data)}"',
                     'ng-if="!filterModel || isFiltered(data)">',
-                    '<span class="tree-icon" ng-class="getExpandIcon(data)" ng-click="toggleExpanded(data, $event)"></span>',
+                    '<span class="tree-icon" ng-class="getExpandIcon(data)"',
+                        'ng-click="toggleExpanded(data, $event)"></span>',
                     '<a ng-class="{checked: isChecked(data), indetermine: !isChecked(data) && childrenChecked(data)}"',
                         'ng-click="toggleChecked(data, $event)">',
                         '<tree-view-transclude></tree-view-transclude>',
@@ -236,14 +237,18 @@ angular.module('TreeView', [])
                         added = utils.arrayMinus(newValue, oldValue);
                     }
                     else {
-                        added = newValue;
-                        this.modelInited = true;
+                        added = newValue || [];
                     }
                     var deleted = utils.arrayMinus(oldValue, newValue);
                     for (var i = 0; i < added.length; i++) {
                         var currentData = $scope.outputAllInfo ? added[i] : this.hashObject[added[i]];
                         currentData.$treeView.isChecked = true;
                         this.expandUp(currentData);
+                        if (!this.modelInited) {
+                            if (!$scope.outputDuplicate) {
+                                this.calculateDown(currentData);  
+                            }
+                        }
                     }
                     for (i = 0; i < deleted.length; i++) {
                         currentData = $scope.outputAllInfo ? deleted[i] : this.hashObject[deleted[i]];
@@ -271,6 +276,7 @@ angular.module('TreeView', [])
                     if (!$scope.outputDuplicate && newValue.length === this.currentLength) {
                         this.deleteDuplicated($scope.ngModel);
                     }
+                    this.modelInited = true;
                 },
                 expandUp: function (data) {
                     var parentItem = data.$treeView.parentData;

@@ -32,6 +32,51 @@ angular.module('TreeView', [])
         return self.options;
     };
 })
+.factory('treeViewService', function () {
+    return {
+        uniqueId: 0,
+        applyChanges: function (source, type, changedItem) {
+            if (type === 'addNewItem') {
+                this.transformDataToTree(
+                    changedItem,
+                    source.$treeView.hashObject,
+                    source.$treeView.valueProperty,
+                    source.$treeView.childrenProperty
+                );
+            }
+        },
+        transformDataToTree: function (data, hashObject, valueProperty, childrenProperty) {
+            if (!angular.isArray(data)) {
+                data = [data];
+            }
+            var stack = [];
+            // 一个迭代，将$treeView的一些属性加进去
+            for (var i = 0; i < data.length; i++) {
+                stack.push(data[i]);
+            }
+            while (stack.length) {
+                var tempData = stack.pop();
+
+                tempData.$treeView = tempData.$treeView || {};
+                if (!(valueProperty in tempData)) {
+                    tempData[valueProperty] = this.uniqueId++;
+                }
+                this.currentLength++;
+                hashObject[tempData[valueProperty]] = tempData;
+
+                if (tempData[childrenProperty] && tempData[childrenProperty].length) {
+                    for (i = 0; i < tempData[childrenProperty].length; i++) {
+                        var tempChild = tempData[childrenProperty][i];
+                        tempChild.$treeView = tempChild.$treeView || {};
+                        tempChild.$treeView.parentData = tempData;
+                        stack.push(tempChild);
+                    }
+                }
+            }
+            return hashObject;
+        }
+    };
+})
 .directive('treeViewItem', function () {
     return {
         require: '^treeView',
@@ -63,7 +108,7 @@ angular.module('TreeView', [])
         }
     };
 })
-.directive('treeView', function (treeViewConfig) {
+.directive('treeView', function (treeViewConfig, treeViewService) {
     return {
         scope: {
             outputAllInfo: '=',
@@ -85,8 +130,6 @@ angular.module('TreeView', [])
             scope.$treeTransclude = childTranscludeFn;
         },
         controller: function ($scope, $element, $attrs, $compile) {
-            var id = 0;
-
             $scope.parentScopeOfTree = $scope.$parent;
 
             $scope.options = $scope.options || {};
@@ -141,6 +184,11 @@ angular.module('TreeView', [])
                 inited: false,
                 init: function (value) {
                     $element.addClass('tree-view');
+                    value.$treeView = {
+                        hashObject: this.hashObject,
+                        valueProperty: $scope.valueProperty,
+                        childrenProperty: $scope.children
+                    };
                     this.transformDataToTree(value);
                     $scope.data = {};
                     $scope.data[$scope.children] = value;
@@ -342,34 +390,11 @@ angular.module('TreeView', [])
                 hashObject: {},
                 currentLength: 0,
                 transformDataToTree: function (data) {
-                    var stack = [];
-                    this.hashObject = {};
-                    // 一个迭代，将$treeView的一些属性加进去
-                    for (var i = 0; i < data.length; i++) {
-                        stack.push(data[i]);
-                    }
-                    while (stack.length) {
-                        var tempData = stack.pop();
-
-                        tempData.$treeView = tempData.$treeView || {};
-                        if (!($scope.valueProperty in tempData)) {
-                            tempData[$scope.valueProperty] = id++;
-                        }
-                        this.currentLength++;
-                        this.hashObject[tempData[$scope.valueProperty]] = tempData;
-
-                        if (tempData[$scope.children] && tempData[$scope.children].length) {
-                            for (i = 0; i < tempData[$scope.children].length; i++) {
-                                var tempChild = tempData[$scope.children][i];
-                                tempChild.$treeView = tempChild.$treeView || {};
-                                tempChild.$treeView.parentData = tempData;
-                                stack.push(tempChild);
-                            }
-                        }
-                    }
+                    treeViewService.transformDataToTree(data, this.hashObject, $scope.valueProperty, $scope.children);
                     if ($attrs.hashObject) {
                         $scope.hashObject = this.hashObject;
                     }
+                    return;
                 },
                 bindEvents: function () {
                     var self = this;
@@ -432,11 +457,11 @@ angular.module('TreeView', [])
             };
 
             $scope.isExpanded = function (data) {
-                return !!data.$treeView.isExpanded;
+                return !!(data.$treeView && data.$treeView.isExpanded);
             };
 
             $scope.isChecked = function (data) {
-                return !!data.$treeView.isChecked;
+                return !!(data.$treeView && data.$treeView.isChecked);
             };
 
             $scope.childrenChecked = function (data) {

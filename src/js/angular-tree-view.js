@@ -234,6 +234,7 @@ angular.module('TreeView', [])
                 fillResult: function (result, deleted, target) {
                     var pairs = [];
                     // 最底层的节点
+                    // Bottom node
                     var cloneTarget = target;
                     while (cloneTarget.$treeView.parentData) {
                         var parentItem = this.getParentItem(cloneTarget);
@@ -357,7 +358,6 @@ angular.module('TreeView', [])
                 calculateDown: function (data, valueChangedItems) {
                     if (data[$scope.children]) {
                         for (var i = 0; i < data[$scope.children].length; i++) {
-                            
                             if (data[$scope.children][i].$treeView.isChecked !== data.$treeView.isChecked) {
                                 valueChangedItems && valueChangedItems.push(data[$scope.children][i]);
                                 data[$scope.children][i].$treeView.isChecked = data.$treeView.isChecked;
@@ -419,24 +419,30 @@ angular.module('TreeView', [])
                         }
                         var result = [];
                         angular.forEach(self.hashObject, function (item, key) {
-                            if (item[$scope.displayProperty].toString().indexOf(newValue) !== -1) {
+                            newValue = newValue.toLowerCase();
+                            var itemToSearch = item[$scope.displayProperty].toString().toLowerCase();
+                            if (itemToSearch.indexOf(newValue) !== -1) {
                                 result.push(item);
                             }
                             else {
                                 item.$treeView.isFiltered = false;
                             }
                         });
-
                         for (var i = 0; i < result.length; i++) {
                             result[i].$treeView.isFiltered = true;
+                            if (result[i].$treeView && result[i].$treeView.parentData) {
+                                result[i].$treeView.parentData.$treeView.isFiltered = true;
+                            }
                             self.filtUp(result[i]);
                             self.expandUp(result[i]);
                         }
+
                     });
                 },
                 filtUp: function (data) {
                     if (data.$treeView.parentData && !data.$treeView.parentData.isFiltered) {
                         data.$treeView.parentData.isFiltered = true;
+                        data.$treeView.parentData.$treeView.isFiltered = true;
                         this.filtUp(data.$treeView.parentData);
                     }
                 }
